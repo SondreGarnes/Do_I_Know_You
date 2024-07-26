@@ -21,3 +21,4 @@ export const getUsers = () => {
 export const checkLoginStatus = () => {
     return axios.get(API_URL + "check_login_status/");
     }
+
