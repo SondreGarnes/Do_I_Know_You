@@ -21,7 +21,11 @@ class CreateUserView(APIView):
             neo4j_connection.run_query(create_user_query, {"first_name":first_name,"last_name":last_name
                                                            , "email": email, "password":hashed_password}) 
             neo4j_connection.close()
-            return Response({"message": "User created."}, status=201)
+            return Response({
+                "message": "User created.",
+                "first_name": first_name,
+                "last_name": last_name
+            }, status=201)
         return Response(serializer.errors, status=400)
     
 class DeleteUsers(APIView):
@@ -48,13 +52,22 @@ class LoginView(APIView):
             email = serializer.validated_data.get('email')
             password = serializer.validated_data.get('password')
             neo4j_connection = Neo4jConnection()
-            get_user_query = "MATCH (u:User {email: $email}) RETURN u.password as password"
+            get_user_query = """
+                MATCH (u:User {email: $email}) 
+                RETURN u.password as password, u.first_name as first_name, u.last_name as last_name
+            """
             user = neo4j_connection.run_query(get_user_query, {"email": email})
             if user:
                 hashed_password = user[0]["password"]
                 if bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8')):
                     request.session['email'] = email
-                    return Response({"message": "Login successful."}, status=200)
+                    first_name = user[0]["first_name"]
+                    last_name = user[0]["last_name"]
+                    return Response({
+                        "message": "Login successful.",
+                        "first_name": first_name,
+                        "last_name": last_name
+                    }, status=200)
             neo4j_connection.close()
         return Response({"message": "Invalid credentials."}, status=400)
 class LogoutView(APIView):

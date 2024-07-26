@@ -1,19 +1,25 @@
 import React, { useState } from 'react';
 import { createUser } from './apiService';
+import { useAuth } from './AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await createUser({ first_name: firstName, last_name: lastName, email, password });
             console.log(response.data);
+            login(response.data.first_name, response.data.last_name);
+            navigate('/');
         } catch (error) {
-            console.error(error);
+            console.error("Registration error:", error);
         }
     };
 
