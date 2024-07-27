@@ -14,7 +14,7 @@ const Login = () => {
         try {
             const response = await loginUser({ email, password });
             console.log(response.data);
-            login(response.data.first_name, response.data.last_name);
+            login(response.data.id, response.data.first_name, response.data.last_name);
             navigate('/');
         }
         catch (error) {

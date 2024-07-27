@@ -22,3 +22,14 @@ export const checkLoginStatus = () => {
     return axios.get(API_URL + "check_login_status/");
     }
 
+export const addFriend = (friendData) => {
+    return axios.post(API_URL + "add_relationship/", friendData);
+    }
+
+    export async function getRelationships() {
+        const response = await fetch(API_URL + "get_relationships/");
+        if (!response.ok) {
+          throw new Error('Failed to fetch relationships');
+        }
+        return response.json();
+      }

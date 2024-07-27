@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { getUsers } from './apiService';
+import { getUsers, addFriend } from './apiService';
 
 const Home = () => {
-    const { isLoggedIn, logout, first_name, last_name } = useAuth();
+    const { isLoggedIn, logout, first_name, last_name, userId } = useAuth();
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
@@ -17,8 +17,19 @@ const Home = () => {
             }
         };
 
+        
         fetchUsers();
+       
     }, []);
+
+    const handleAddFriend = async (friendId) => {
+        try {
+            const response = await addFriend({ user1_id: userId, user2_id: friendId });
+            console.log("Friend added:", response.data);
+        } catch (error) {
+            console.error("Error adding friend:", error);
+        }
+    };
 
     return (
         <div>
@@ -31,8 +42,11 @@ const Home = () => {
                         <button onClick={logout}>Logout</button>
                         <h2>Other Users</h2>
                         <ul>
-                            {users.map(user => (
-                                <li key={user.id}>{user.first_name} {user.last_name}</li>
+                            {users.filter(user => user.id !== userId).map(user => (
+                                <li key={user.id}>
+                                    {user.first_name} {user.last_name}
+                                    <button onClick={() => handleAddFriend(user.id)}>Add Friend</button>
+                                </li>
                             ))}
                         </ul>
                     </div>
