@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import UserSerializer, LoginSerializer, RelationshipSerializer
@@ -189,3 +190,68 @@ class DeleteRelationships(APIView):
         neo4j_connection.run_query(delete_relationships_query)
         neo4j_connection.close()
         return Response({"message": "All relationships deleted."}, status=200)
+
+
+
+class CheckRelationship(APIView):
+    def get(self, request):
+        user1_id = request.query_params.get('user1_id')
+        user2_id = request.query_params.get('user2_id')
+        
+        if not user1_id or not user2_id:
+            return Response({"message": "Both user1_id and user2_id are required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        neo4j_connection = Neo4jConnection()
+        
+        check_relationship_query = """
+            MATCH (u1:User)-[r:FRIEND]->(u2:User)
+            WHERE elementId(u1) = $user1_id AND elementId(u2) = $user2_id
+            RETURN type(r) as relationship_type
+        """
+        
+        try:
+            existing_relationship = neo4j_connection.run_query(check_relationship_query, {
+                "user1_id": user1_id,
+                "user2_id": user2_id
+            })
+            
+            neo4j_connection.close()
+            
+            if existing_relationship:
+                return Response({
+                    "message": "Users are friends.",
+                    "relationship_type": existing_relationship[0]["relationship_type"]
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Users are not friends."}, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            neo4j_connection.close()
+            return Response({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
+class GetGraphData(APIView):
+    def get(self, request):
+        neo4j_connection = Neo4jConnection()
+        
+        get_users_query = "MATCH (u:User) RETURN elementId(u) as id, u.first_name as first_name, u.last_name as last_name"
+        get_relationships_query = """
+            MATCH (u1:User)-[r:FRIEND]->(u2:User)
+            RETURN elementId(u1) as source, elementId(u2) as target, type(r) as relationship_type
+        """
+        
+        try:
+            users = neo4j_connection.run_query(get_users_query)
+            relationships = neo4j_connection.run_query(get_relationships_query)
+            neo4j_connection.close()
+            
+            nodes = [{"data": {"id": record["id"], "label": f"{record['first_name']} {record['last_name']}"}} for record in users]
+            edges = [{"data": {"source": record["source"], "target": record["target"], "relationship_type": record["relationship_type"]}} for record in relationships]
+            
+            graph_data = {"nodes": nodes, "edges": edges}
+            
+            return Response(graph_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            neo4j_connection.close()
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

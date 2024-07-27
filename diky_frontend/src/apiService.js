@@ -26,10 +26,24 @@ export const addFriend = (friendData) => {
     return axios.post(API_URL + "add_relationship/", friendData);
     }
 
-    export async function getRelationships() {
-        const response = await fetch(API_URL + "get_relationships/");
-        if (!response.ok) {
-          throw new Error('Failed to fetch relationships');
-        }
-        return response.json();
-      }
+export async function getRelationships(userId) {
+    const response = await fetch(API_URL + "get_relationships/=$");
+    if (!response.ok) {
+      throw new Error('Failed to fetch relationships');
+    }
+    return response.json();
+  }
+export async function checkRelationship(user1_id, user2_id) {
+    const response = await fetch(`${API_URL}check-relationship/?user1_id=${user1_id}&user2_id=${user2_id}`);
+    if (!response.ok) {
+        throw new Error('Failed to fetch check relationship');
+    }
+    return response.json();
+}
+export async function getGraphData() {
+    const response = await fetch(API_URL + "get_graph_data/");
+    if (!response.ok) {
+        throw new Error('Failed to fetch graph data');
+    }
+    return response.json();
+}
