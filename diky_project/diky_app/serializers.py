@@ -9,3 +9,7 @@ class UserSerializer(serializers.Serializer):
 class LoginSerializer(serializers.Serializer):
     email=serializers.EmailField()
     password=serializers.CharField(write_only=True)
+
+class RelationshipSerializer(serializers.Serializer):
+    user1_id = serializers.CharField()
+    user2_id = serializers.CharField()
