@@ -40,7 +40,7 @@ const Home = () => {
     return (
         <div>
             <h1>Welcome to the Home Page you Animal</h1>
-            <p>This is the home page of the application.</p>
+            <p>This is the home page of the application. Dont sleep</p>
             <nav>
                 {isLoggedIn ? (
                     <div>
