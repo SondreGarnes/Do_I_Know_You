@@ -1,0 +1,41 @@
+
+
+services:
+  backend:
+    build:
+      dockerfile: Dockerfile
+    container_name: diky_backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./diky_project:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - neo4j
+
+  frontend:
+    build:
+      context: ./diky_frontend
+    container_name: diky_frontend
+    volumes:
+      - ./diky_frontend:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  neo4j:
+    image: neo4j:4.4
+    container_name: diky_neo4j
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+
+volumes:
+  neo4j_data:
