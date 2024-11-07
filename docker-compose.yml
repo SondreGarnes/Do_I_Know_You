@@ -11,8 +11,9 @@ services:
       - ./diky_project:/app
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
     depends_on:
       - neo4j
 
