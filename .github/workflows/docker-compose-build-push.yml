@@ -28,12 +28,18 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Set environment variables
+      - name: Build and tag backend image
         run: |
-          echo "NEO4J_USER=${{ secrets.NEO4J_USER }}" >> $GITHUB_ENV
-          echo "NEO4J_PASSWORD=${{ secrets.NEO4J_PASSWORD }}" >> $GITHUB_ENV
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/diky_backend:latest -f Dockerfile .
 
-      - name: Build and push Docker images
+      - name: Build and tag frontend image
         run: |
-          docker-compose -f docker-compose.yml build
-          docker-compose -f docker-compose.yml push
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/diky_frontend:latest -f diky_frontend/Dockerfile ./diky_frontend
+
+      - name: Push backend image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/diky_backend:latest
+
+      - name: Push frontend image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/diky_frontend:latest
