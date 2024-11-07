@@ -3,8 +3,8 @@
 services:
   backend:
     build:
-      context: ./diky_project
-      dockerfile: ./diky_project/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: diky_backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
